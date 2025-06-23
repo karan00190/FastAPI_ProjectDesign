@@ -7,12 +7,16 @@ from random import randrange
 
 app = FastAPI()
 
-class Post(BaseModel):
+class Post(BaseModel):    #to define the structure of application
     title: str
     content: str
     published: bool = True   
     rating: Optional[int] = None
 #title str, content str,category, bool published
+
+
+
+
 
 my_posts =[{"title":"title of post 1","content":"content of post1","id":1},{"title":"Favorite foods","content":"I like pizza","id":2}]
 
@@ -31,7 +35,7 @@ def find_index_post(id):
 
 
 # request Get method url "/
-@app.get("/") 
+@app.get("/")     #This is we called as decoraters
 def root():
     return {"message": "This is KK and FastAPI is OP"}
 
@@ -57,9 +61,9 @@ def get_latest_post():
     return {"detail": post}
 
 
-@app.get("/posts/{id}")  # here {id} => is called as path parameter (basically returns teh id)
+@app.get("/posts/{id}")  # here {id} => is called as path parameter (basically returns the id)
 def get_post(id:int,response:Response):    # to pass the message for non integer types (data validation)
-    post = find_post(int(id))  # because in my_posts dictionary it is returning string so we have to type cast of we can use pydantic fucntionality in after the pasisng the function it while we are returning from that 
+    post = find_post(int(id))  # because in my_posts dictionary it is returning string so we have to type cast of we can use pydantic fucntionality in after the passing the function it while we are returning from that 
     if not post:
         raise HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail =f"Unfortunaterly it's not available with id {id}!")
 
@@ -85,5 +89,27 @@ def delete_post(id: int):
 
     my_posts.pop(index)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@app.put("/posts/{id}",status_code=status.HTTP_202_ACCEPTED)
+def update_post(id:int, post:Post):
+    
+    index = find_index_post(id)
+
+    if index ==None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail =f'post with :{id} does not exist')
+    
+    post_dict = post.dict()
+    post_dict['id'] =id
+    my_posts[index] = post_dict
+    return {'data': post_dict}
+
+
+    #now from now onwards we will work with database
+
+
+
+
+
 
 
